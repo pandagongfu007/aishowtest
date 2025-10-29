@@ -1,0 +1,4 @@
+[submodule "aisshowtestwindrv"]
+	path = aisshowtestwindrv
+	url = git@github.com:pandagongfu007/aisshowtestwindrv.git
+	branch = main
