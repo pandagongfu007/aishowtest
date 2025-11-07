@@ -1,0 +1,9 @@
+streams:
+  - id: "rigged-1-main"
+    source: "file:/data/test_pattern.mp4"
+    hls_output: "C:/video/hls/rigged-1-main.m3u8"
+    description: "加固机1 主视频测试流"
+  - id: "rigged-1-loop"
+    source: "rtsp://192.168.3.50/live"
+    hls_output: "C:/video/hls/rigged-1-loop.m3u8"
+    description: "加固机1 回环采集流"

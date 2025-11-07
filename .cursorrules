@@ -1,0 +1,37 @@
+# Vendor code rules
+- Treat folder `aishowtestwindrv` as existing C++ PCIe driver. Do NOT rewrite driver logic.
+- Treat folder `ate-conn-sample` as vendor middleware. Do NOT modify its Python files
+  (conn.py, heartbeat.py, main.py, push.py, server.py). Only call its HTTP APIs.
+
+# Backend architecture rules
+- Implement all new backend features in folder `gui-backend` using Python + FastAPI.
+- gui-backend listens on 0.0.0.0:3005.
+- gui-backend talks to vendor middleware via HTTP on 127.0.0.1:27101.
+- Provide REST + WebSocket APIs for GUI:
+  - GET /healthz
+  - GET /overview
+  - GET /atebox/{id}/results
+  - GET /video/streams
+- Use Pydantic models for all request/response bodies.
+- Use httpx.AsyncClient for calling vendor middleware.
+
+# Video streaming rules
+- Scripts under `video-service` manage FFmpeg-based video streaming.
+- Encode once, allow multiple clients to subscribe.
+- gui-backend only exposes stream metadata (id, label, url), NOT re-encode video.
+
+# Frontend rules
+- Frontend lives in `GUI` using React + TypeScript + Vite.
+- UI style: white background, blue as primary color, simple and clean.
+- Layout:
+  - Left side: navigation (Overview, Atebox-1..5, Settings).
+  - Right side: main dashboard area.
+- Pages:
+  - OverviewPage: cards for each Atebox with status + last result + optional video preview.
+  - AteboxPage: per-Atebox detail (table + log + video).
+  - ConfigEntryPage: list of links to each Atebox management URL via switch.
+- Frontend calls gui-backend via base URL from env `VITE_BACKEND_BASE_URL`.
+
+# General
+- Write code and comments in English.
+- User-facing labels and text can be in Simplified Chinese.
