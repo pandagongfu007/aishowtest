@@ -1,0 +1,20 @@
+# 物联网平台边缘控制模块依赖
+# Python 3.7+
+
+# Web框架
+Sanic>=25.3.0  # 需要修复 websockets 导入问题，使用 websockets.protocol 而不是 websockets.connection
+websockets>=9.1,<11.0  # Sanic 25.3.0 需要 websockets < 11.0（CLOSED/CLOSING/OPEN 在 protocol 模块中）
+
+# HTTP客户端
+httpx>=0.24.0
+
+# 测试框架
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+sanic-testing>=0.8.0
+
+# 代码质量工具
+flake8>=6.0.0
+black>=23.0.0
+
