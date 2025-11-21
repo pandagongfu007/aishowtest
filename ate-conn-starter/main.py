@@ -12,6 +12,8 @@ from conn import Connector
 from server import app, init_app_context, run_server
 from heartbeat import HeartbeatThread
 from log import Log
+from const import PORT          # ★ 新增这一行
+
 
 logger = Log()
 
@@ -67,7 +69,7 @@ class Main:
         
         try:
             # 启动HTTP服务器（阻塞）
-            run_server()
+            run_server("0.0.0.0", PORT, self.connector) 
         except KeyboardInterrupt:
             logger.info("Received keyboard interrupt")
         except Exception as e:

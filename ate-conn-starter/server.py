@@ -11,6 +11,9 @@ from typing import Dict, Any
 from const import PORT, OpType
 from log import Log
 
+
+
+
 # 创建Sanic应用实例
 app = Sanic("edge_control")
 
@@ -199,6 +202,11 @@ async def execute_instruction(request: Request, tid: str, sn: str):
         instruction = data['template']
         params = data['params']
         replys = data['replys']
+
+
+        code = data["code"]
+        connector.current_code = code   # 简单做法：临时挂在单例上
+        
         
         if op_type == OpType.WRITE:  # 写操作
             success, message = connector.write(sn, instruction, params)
@@ -265,15 +273,16 @@ async def execute_instruction(request: Request, tid: str, sn: str):
         logger.info(f"返回内容 - {response}")
         return json(response, status=500)
 
+        
+def run_server(host, port, connector):
+    init_app_context(connector)
+    app.run(
+        host=host,
+        port=port,
+        debug=False,
+        auto_reload=False,
+        single_process=True,
+    )        
 
-def run_server(host: str = "0.0.0.0", port: int = PORT) -> None:
-    """
-    启动HTTP服务器
-    
-    Args:
-        host: 监听地址
-        port: 监听端口
-    """
-    logger.info(f"Starting HTTP server on {host}:{port}")
-    app.run(host=host, port=port, debug=False)
+
 

@@ -27,7 +27,7 @@ SERVICE_VERSION = "6.0.1"
 SERVICE_KIND = "conn"
 
 # Edge平台配置
-EDGE_HOST = "127.0.0.1"
+EDGE_HOST = "192.168.3.103"
 EDGE_PORT = 5000
 
 # 超时配置

@@ -1,11 +1,11 @@
 import React from "react";
 
 const ATEBOX_LINKS = [
-  { id: 1, name: "Atebox-1", url: "http://192.168.3.100:8001" },
-  { id: 2, name: "Atebox-2", url: "http://192.168.3.101:8001" },
-  { id: 3, name: "Atebox-3", url: "http://192.168.3.102:8001" },
-  { id: 4, name: "Atebox-4", url: "http://192.168.3.103:8001" },
-  { id: 5, name: "Atebox-5", url: "http://192.168.3.104:8001" },
+  { id: 1, name: "Atebox-1", url: "http://192.168.3.103:8141" },
+  { id: 2, name: "Atebox-2", url: "http://192.168.3.104:8141" },
+  { id: 3, name: "Atebox-3", url: "http://192.168.3.105:8141" },
+  { id: 4, name: "Atebox-4", url: "http://192.168.3.106:8141" },
+  { id: 5, name: "Atebox-5", url: "http://192.168.3.107:8141" },
 ];
 
 export const ConfigEntryPage: React.FC = () => (
