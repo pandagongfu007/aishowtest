@@ -1,61 +1,42 @@
-"""
-消息推送模块
+# push.py
+import json
+from typing import Dict, Any
+import requests
 
-提供HTTP消息推送功能，用于向Edge平台发送心跳消息。
-"""
-
-import httpx
-from typing import Dict, Any, Optional
-from log import Log
 from const import EDGE_HOST, EDGE_PORT
+from log import Log
 
 logger = Log()
 
 
 class PushService:
-    """推送服务类（单例模式），负责向Edge平台发送HTTP消息"""
-    
-    _instance: Optional['PushService'] = None
-    _lock = None
-    
-    def __new__(cls) -> 'PushService':
-        """单例模式实现"""
-        import threading
-        if cls._lock is None:
-            cls._lock = threading.Lock()
-        
-        if cls._instance is None:
-            with cls._lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-        return cls._instance
-    
-    def push(self, message: Dict[str, Any], endpoint: str = "/heart") -> bool:
-        """
-        向Edge平台推送消息
-        
-        Args:
-            message: 要推送的消息字典
-            endpoint: API端点路径
-            
-        Returns:
-            推送是否成功
-        """
-        url = f"http://{EDGE_HOST}:{EDGE_PORT}{endpoint}"
-        
-        try:
-            with httpx.Client(timeout=5.0) as client:
-                response = client.post(url, json=message)
-                response.raise_for_status()
-                logger.debug(f"Heartbeat sent successfully to {url}")
-                return True
-        except httpx.RequestError as e:
-            logger.error(f"Failed to send heartbeat to {url}: {str(e)}")
-            return False
-        except httpx.HTTPStatusError as e:
-            logger.error(f"Heartbeat request failed with status {e.response.status_code}: {str(e)}")
-            return False
-        except Exception as e:
-            logger.error(f"Unexpected error sending heartbeat: {str(e)}")
-            return False
+    """
+    向 Edge 平台推送消息的简单实现
+    目前只用于心跳，把行为做得和 PowerShell 测试一致：
+    - HTTP POST
+    - URL: http://EDGE_HOST:EDGE_PORT/heart
+    - JSON body
+    - 关闭环境代理（proxies={}）
+    """
 
+    def __init__(self) -> None:
+        self.url = f"http://{EDGE_HOST}:{EDGE_PORT}/heart"
+
+    def push(self, message: Dict[str, Any]) -> bool:
+        try:
+            # 为了调试清晰，可以先打印一条日志
+            logger.debug(f"Send heartbeat to {self.url}, body={json.dumps(message, ensure_ascii=False)}")
+
+            resp = requests.post(
+                self.url,
+                json=message,          # 直接传 json，requests 会自动加 Content-Type
+                timeout=5,             # 和你 Invoke-WebRequest 的 TimeoutSec 一样
+                proxies={}             # 关键：忽略系统 HTTP_PROXY / HTTPS_PROXY，避免走不了内网
+            )
+            resp.raise_for_status()
+
+            logger.debug(f"Heartbeat HTTP {resp.status_code}: {resp.text}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send heartbeat to {self.url}: {e}")
+            return False
