@@ -62,7 +62,7 @@ class Connector:
           # 2) 你的 DUT：显示设备 154001，对应本地 CHR44X02 离散卡
           {
               "sn": "154001",        # 在 ATE 里就用 154001 当成 SN/设备号
-              "model": "CHR44X02",   # 关键：走 drv_sim_aishow 分支
+              "model": "154001",   # 关键：走 drv_sim_aishow 分支
               "mfr": "fanmai",
               "host": "local",       # 本地 PCIe，不走 socket
               "port": 0,
@@ -182,7 +182,7 @@ class Connector:
           return False, f"仪器掉线，当前 sn: {sn}"
 
       # 本地离散卡：走 Python 仿真，不用 socket
-      if inst.model == "CHR44X02":
+      if inst.model == "154001":
           param_dict = {p["key"]: p["value"] for p in params}
           ok, msg = drv_write(code=self.current_code, params=param_dict)
           return ok, msg
@@ -231,7 +231,7 @@ class Connector:
 
       try:
           # 本地离散卡：直接走仿真
-          if inst.model == "CHR44X02":
+          if inst.model == "154001":
               param_dict = {p["key"]: p["value"] for p in params}
               ok, content = drv_read(code=self.current_code, params=param_dict)
               if not ok:
