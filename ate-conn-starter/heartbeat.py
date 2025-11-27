@@ -21,6 +21,8 @@ from const import (
 from conn import Connector
 from push import PushService
 
+from const import EDGE_HOST
+
 logger = Log()
 
 
@@ -120,7 +122,15 @@ class HeartbeatThread(threading.Thread):
         
         return insts_list
     
+
     def _get_local_ip(self) -> str:
+        """
+        获取本机 IP 地址
+
+        为了避免多网卡导致 IP 跳来跳去，这里直接写死为加固机在 ATE 网络中的 IP。
+        """
+        return "192.168.3.90"
+
         """
         获取本机IP地址
         

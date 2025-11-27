@@ -61,8 +61,8 @@ class Connector:
   
           # 2) 你的 DUT：显示设备 154001，对应本地 CHR44X02 离散卡
           {
-              "sn": "154001",        # 在 ATE 里就用 154001 当成 SN/设备号
-              "model": "154001",   # 关键：走 drv_sim_aishow 分支
+              "sn": "15400X",        # 在 ATE 里就用 154001 当成 SN/设备号
+              "model": "15400X",   # 关键：走 drv_sim_aishow 分支
               "mfr": "fanmai",
               "host": "local",       # 本地 PCIe，不走 socket
               "port": 0,

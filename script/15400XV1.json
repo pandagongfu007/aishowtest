@@ -1,0 +1,36 @@
+{
+    "_id": "691c50f771cb3d0032a08f2b",
+    "item_id": "691c4e5645b737003021d98d",
+    "item_name": "15400X",
+    "version": "V1",
+    "status": 0,
+    "tags": [],
+    "desc": "154001 154002 154003 本项目是个通用的案例",
+    "instruments": [
+        {
+            "instrument_model": "6912fdb6ab7f6f00310d1e36",
+            "instrument_kind": "非标设备",
+            "manufacturer": "泛迈",
+            "instrument_label": "15400X123",
+            "model_name": "154001",
+            "inskind_id": "67dd0371b907c8002f02bc7a"
+        }
+    ],
+    "vars": [],
+    "datas": [],
+    "item_graph": {
+        "nodes": [],
+        "lines": []
+    },
+    "created_by": "68941791eb173d002f8a4ab5",
+    "created_time": "2025-11-18 18:56:55",
+    "updated_by": "68941791eb173d002f8a4ab5",
+    "updated_time": "2025-11-18 18:56:55",
+    "photo_path": "/public/itemPhoto/691c4e5645b737003021d98dV1.png",
+    "operate_user": "张明康",
+    "class": "basics",
+    "updated_user": "张明康",
+    "company_id": "68941791eb173d002f8a4ab4",
+    "org_id": "68941791eb173d002f8a4ab4",
+    "ver_desc": ""
+}
