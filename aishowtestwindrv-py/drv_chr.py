@@ -1,257 +1,320 @@
 # drv_chr.py
+# 统一封装 CHR34XXX（串口卡）与 CHR44X02（离散量卡）最小集接口 + 版本查询
+# - 自动从 ./Lib 或系统 PATH 加载 x64 DLL
+# - 设置环境变量 PCIE_MOCK=1 或未找到 DLL 时进入模拟模式
+
 from __future__ import annotations
-import os, sys, ctypes
-from ctypes import wintypes
-from typing import Optional, Tuple, List
+import os, ctypes, sys, pathlib, platform
+from typing import Optional
 
-# -------- 配置：是否启用“模拟模式” --------
-# 方式一：环境变量  set PCIE_MOCK=1
-# 方式二：运行时传参  pcie_shell.py --mock
-MOCK = bool(int(os.environ.get("PCIE_MOCK", "0")))
+# ---- 环境与类型别名 ----
+IS_64 = platform.architecture()[0] == "64bit"
+MOCK  = os.environ.get("PCIE_MOCK", "0") == "1"
 
-# -------- Windows 基本类型 --------
-BYTE   = ctypes.c_ubyte
 DWORD  = ctypes.c_uint32
+BYTE   = ctypes.c_uint8
+HANDLE = ctypes.c_void_p
 BOOL   = ctypes.c_int
-HANDLE = wintypes.HANDLE
-LPBYTE = ctypes.POINTER(BYTE)
-LPDWORD= ctypes.POINTER(DWORD)
 
-# -------- 串口 DCB 结构（按你 C++ 里用到的最小字段）--------
-class CHRUART_DCB_ST(ctypes.Structure):
-    _fields_ = [
-        ("BaudRate", DWORD),
-        ("ByteSize", BYTE),
-        ("Parity",   BYTE),   # 0N 1O 2E 3M 4S
-        ("StopBits", BYTE),   # 0:1 1:1.5 2:2
-    ]
+# ---- 工具：查找并加载 DLL ----
+def _find_dll(name: str) -> Optional[str]:
+    # 优先 ./Lib
+    here = pathlib.Path(__file__).resolve().parent
+    cand = here / "Lib" / name
+    if cand.exists():
+        return str(cand)
+    # 兼容大小写或另一路径
+    for p in [here, here / "Lib", here.parent, pathlib.Path(os.getcwd())]:
+        f = p / name
+        if f.exists():
+            return str(f)
+    return None
 
-# ========= 动态加载 DLL =========
-def _dll_path(name: str) -> Optional[str]:
-    here = os.path.dirname(os.path.abspath(__file__))
-    cand = os.path.join(here, "Lib", name)
-    if os.path.exists(cand):
-        return cand
-    # 交给系统搜索 PATH
-    return name
-
-_chr44 = None
-_chr34 = None
-
-def _load_dlls(mock: bool = MOCK):
-    global _chr44, _chr34
-    if mock:
-        _chr44 = _chr34 = None
-        return
+def _load_dll(name: str) -> Optional[ctypes.CDLL]:
+    path = _find_dll(name)
+    if not path:
+        return None
     try:
-        _chr44 = ctypes.WinDLL(_dll_path("CHR44X02.dll"))
-    except Exception as e:
-        _chr44 = None
+        return ctypes.WinDLL(path)
+    except Exception:
+        return None
+
+def _dw_to_verstr(dw: int) -> str:
+    a = (dw >> 24) & 0xFF
+    b = (dw >> 16) & 0xFF
+    c = (dw >> 8)  & 0xFF
+    d = (dw >> 0)  & 0xFF
+    return f"{a}.{b}.{c}.{d}"
+
+def _bind_opt(dll, name, argtypes=None, restype=ctypes.c_uint32):
+    """绑定可选导出；不存在时返回 None"""
+    if dll is None:
+        return None
     try:
-        _chr34 = ctypes.WinDLL(_dll_path("CHR34XXX.dll"))
-    except Exception as e:
-        _chr34 = None
+        fn = getattr(dll, name)
+        if argtypes is not None:
+            fn.argtypes = argtypes
+        fn.restype = restype
+        return fn
+    except Exception:
+        return None
 
-_load_dlls()
 
-# ========= 绑定 44X02 接口（离散量）=========
-class DIError(RuntimeError): ...
-class SERError(RuntimeError): ...
-
+# ======================================================================
+#                           CHR44X02（离散卡）
+# ======================================================================
 class CHR44X02:
+    _dll_name = "CHR44X02.dll"
+
     def __init__(self):
-        self.hdev: Optional[HANDLE] = None
-        self.hevt: Optional[HANDLE] = None
-        if not MOCK and _chr44 is None:
-            raise DIError("未找到 CHR44X02.dll（或位数不匹配）")
+        global MOCK
+        self._dll = _load_dll(self._dll_name)
+        if self._dll is None:
+            MOCK = True
+        self.hdev: HANDLE = None
+        self._bind()
 
-        if not MOCK:
-            # int CHR44X02_OpenDev(HANDLE*, BYTE)
-            _chr44.CHR44X02_OpenDev.argtypes  = [ctypes.POINTER(HANDLE), BYTE]
-            _chr44.CHR44X02_OpenDev.restype   = ctypes.c_int
+    # 绑定最小集接口
+    def _bind(self):
+        d = self._dll
+        self._OpenDev   = _bind_opt(d, "CHR44X02_OpenDev",   [ctypes.POINTER(HANDLE), BYTE], ctypes.c_int)
+        self._CloseDev  = _bind_opt(d, "CHR44X02_CloseDev",  [HANDLE], ctypes.c_int)
+        self._ResetDev  = _bind_opt(d, "CHR44X02_ResetDev",  [HANDLE], ctypes.c_int)
 
-            _chr44.CHR44X02_CloseDev.argtypes = [HANDLE]
-            _chr44.CHR44X02_CloseDev.restype  = ctypes.c_int
+        self._GetDI     = _bind_opt(d, "CHR44X02_IO_GetInputStatus", [HANDLE, BYTE, ctypes.POINTER(BYTE)], ctypes.c_int)
+        self._SetDO     = _bind_opt(d, "CHR44X02_IO_SetOutputStatus",[HANDLE, BYTE, BYTE], ctypes.c_int)
 
-            _chr44.CHR44X02_ResetDev.argtypes = [HANDLE]
-            _chr44.CHR44X02_ResetDev.restype  = ctypes.c_int
+        self._SetWork   = _bind_opt(d, "CHR44X02_SetWorkMode",[HANDLE, BYTE], ctypes.c_int)
+        self._SetTrigLn = _bind_opt(d, "CHR44X02_SetTrigLine",[HANDLE, BYTE], ctypes.c_int)
 
-            _chr44.CHR44X02_IO_GetInputStatus.argtypes = [HANDLE, BYTE, ctypes.POINTER(BYTE)]
-            _chr44.CHR44X02_IO_GetInputStatus.restype  = ctypes.c_int
+        self._TrigCfg   = _bind_opt(d, "CHR44X02_TrigIn_Config",      [HANDLE, BYTE, BYTE], ctypes.c_int)
+        self._TrigEvt   = _bind_opt(d, "CHR44X02_TrigIn_CreateEvent", [HANDLE, ctypes.POINTER(HANDLE)], ctypes.c_int)
+        self._TrigWait  = _bind_opt(d, "CHR44X02_TrigIn_WaitEvent",   [HANDLE, HANDLE, DWORD], DWORD)
+        self._TrigGet   = _bind_opt(d, "CHR44X02_TrigIn_GetStatus",   [HANDLE, ctypes.POINTER(BYTE)], ctypes.c_int)
+        self._TrigClose = _bind_opt(d, "CHR44X02_TrigIn_CloseEvent",  [HANDLE, HANDLE], ctypes.c_int)
 
-            _chr44.CHR44X02_IO_SetOutputStatus.argtypes = [HANDLE, BYTE, BYTE]
-            _chr44.CHR44X02_IO_SetOutputStatus.restype  = ctypes.c_int
+        # 版本接口（可选）
+        self._GetDLLVer = _bind_opt(d, "CHR44X02_GetDLLVersion",  [], DWORD)
+        self._GetDRVVer = _bind_opt(d, "CHR44X02_GetDriverVersion",[], DWORD)
+        self._GetFWVer  = _bind_opt(d, "CHR44X02_GetFirmwareVersion", [HANDLE, ctypes.POINTER(DWORD)], ctypes.c_int)
 
-            _chr44.CHR44X02_SetWorkMode.argtypes = [HANDLE, BYTE]
-            _chr44.CHR44X02_SetWorkMode.restype  = ctypes.c_int
-
-            _chr44.CHR44X02_SetTrigLine.argtypes = [HANDLE, BYTE]
-            _chr44.CHR44X02_SetTrigLine.restype  = ctypes.c_int
-
-            _chr44.CHR44X02_TrigIn_Config.argtypes = [HANDLE, BYTE, BYTE]
-            _chr44.CHR44X02_TrigIn_Config.restype  = ctypes.c_int
-
-            _chr44.CHR44X02_TrigIn_CreateEvent.argtypes = [HANDLE, ctypes.POINTER(HANDLE)]
-            _chr44.CHR44X02_TrigIn_CreateEvent.restype  = ctypes.c_int
-
-            _chr44.CHR44X02_TrigIn_WaitEvent.argtypes = [HANDLE, HANDLE, DWORD]
-            _chr44.CHR44X02_TrigIn_WaitEvent.restype  = DWORD
-
-            _chr44.CHR44X02_TrigIn_CloseEvent.argtypes = [HANDLE, HANDLE]
-            _chr44.CHR44X02_TrigIn_CloseEvent.restype  = ctypes.c_int
-
-            _chr44.CHR44X02_TrigIn_GetStatus.argtypes = [HANDLE, ctypes.POINTER(BYTE)]
-            _chr44.CHR44X02_TrigIn_GetStatus.restype  = ctypes.c_int
-
-        # 模拟态用本地状态
-        self._mock_di = [0]*24
-        self._mock_do = [0]*24
-        self._workmode = 0
-        self._trigline = 0
-
-    # ---- 基本生命周期 ----
-    def open(self, card_id: int):
+    # ---- 生命周期 ----
+    def open(self, card_id: int) -> int:
         if MOCK:
             self.hdev = HANDLE(1)
-            return
+            return 0
+        if not self._OpenDev:
+            return -1
         h = HANDLE()
-        rc = _chr44.CHR44X02_OpenDev(ctypes.byref(h), BYTE(card_id))
-        if rc != 0 or not h:
-            raise DIError(f"CHR44X02_OpenDev rc={rc}")
-        self.hdev = h
+        rc = self._OpenDev(ctypes.byref(h), BYTE(card_id))
+        if rc == 0:
+            self.hdev = h
+        return rc
 
-    def reset(self):
-        if MOCK: 
-            self._mock_di = [0]*24; self._mock_do=[0]*24
-            return
-        self._need_open()
-        rc = _chr44.CHR44X02_ResetDev(self.hdev)
-        if rc != 0: raise DIError(f"Reset rc={rc}")
+    def reset(self) -> int:
+        if not self.hdev: return 0
+        if MOCK: return 0
+        return 0 if not self._ResetDev else self._ResetDev(self.hdev)
 
-    def close(self):
-        if self.hdev and not MOCK:
-            _chr44.CHR44X02_ResetDev(self.hdev)
-            if self.hevt:
-                _chr44.CHR44X02_TrigIn_CloseEvent(self.hdev, self.hevt)
-                self.hevt = None
-            _chr44.CHR44X02_CloseDev(self.hdev)
-        self.hdev = None
-
-    def _need_open(self):
-        if not self.hdev:
-            raise DIError("device not open")
-
-    # ---- DI/DO ----
-    def di_get(self, ch: int) -> int:
-        if MOCK: return self._mock_di[ch]
-        self._need_open()
-        v = BYTE()
-        rc = _chr44.CHR44X02_IO_GetInputStatus(self.hdev, BYTE(ch), ctypes.byref(v))
-        if rc != 0: raise DIError(f"GetInputStatus rc={rc}")
-        return int(v.value)
-
-    def do_set(self, ch: int, val: int):
-        if MOCK: 
-            self._mock_do[ch] = 1 if val else 0
-            return
-        self._need_open()
-        rc = _chr44.CHR44X02_IO_SetOutputStatus(self.hdev, BYTE(ch), BYTE(val))
-        if rc != 0: raise DIError(f"SetOutput rc={rc}")
-
-    # ---- Trig ----
-    def set_workmode(self, m: int):
-        if MOCK: self._workmode = m; return
-        self._need_open()
-        rc = _chr44.CHR44X02_SetWorkMode(self.hdev, BYTE(m))
-        if rc != 0: raise DIError(f"SetWorkMode rc={rc}")
-
-    def set_trigline(self, line: int):
-        if MOCK: self._trigline = line; return
-        self._need_open()
-        rc = _chr44.CHR44X02_SetTrigLine(self.hdev, BYTE(line))
-        if rc != 0: raise DIError(f"SetTrigLine rc={rc}")
-
-    def trig_cfg(self, line: int, edge: int):
-        if MOCK: return
-        self._need_open()
-        rc = _chr44.CHR44X02_TrigIn_Config(self.hdev, BYTE(line), BYTE(edge))
-        if rc != 0: raise DIError(f"TrigIn_Config rc={rc}")
-
-    def trig_wait(self, timeout_ms: int) -> Tuple[int,int]:
+    def close(self) -> int:
+        if not self.hdev: return 0
         if MOCK:
-            # 模拟：100ms 内必到一次
-            return (0x00000001, 1)
-        self._need_open()
-        if not self.hevt:
-            evt = HANDLE()
-            rc = _chr44.CHR44X02_TrigIn_CreateEvent(self.hdev, ctypes.byref(evt))
-            if rc != 0 or not evt: raise DIError(f"CreateEvent rc={rc}")
-            self.hevt = evt
-        dw = _chr44.CHR44X02_TrigIn_WaitEvent(self.hdev, self.hevt, DWORD(timeout_ms))
-        st = BYTE()
-        _chr44.CHR44X02_TrigIn_GetStatus(self.hdev, ctypes.byref(st))
-        return (int(dw), int(st.value))
+            self.hdev = None
+            return 0
+        rc = 0
+        if self._ResetDev: rc = self._ResetDev(self.hdev)
+        if self._CloseDev: rc = self._CloseDev(self.hdev)
+        self.hdev = None
+        return rc
 
-# ========= 34XXX 串口 =========
+    # ---- IO ----
+    def di_get(self, ch: int) -> int:
+        if MOCK: return 1 if (ch % 2) else 0
+        if not self._GetDI or not self.hdev: return -1
+        v = BYTE(0)
+        rc = self._GetDI(self.hdev, BYTE(ch), ctypes.byref(v))
+        return v.value if rc == 0 else -1
+
+    def do_set(self, ch: int, val: int) -> int:
+        if MOCK: return 0
+        if not self._SetDO or not self.hdev: return -1
+        return self._SetDO(self.hdev, BYTE(ch), BYTE(val))
+
+    # ---- 模式 & 触发 ----
+    def set_workmode(self, m: int) -> int:
+        if MOCK: return 0
+        if not self._SetWork or not self.hdev: return -1
+        return self._SetWork(self.hdev, BYTE(m))
+
+    def set_trig_line(self, ln: int) -> int:
+        if MOCK: return 0
+        if not self._SetTrigLn or not self.hdev: return -1
+        return self._SetTrigLn(self.hdev, BYTE(ln))
+
+    def trig_cfg(self, ln: int, edge: int) -> int:
+        if MOCK: return 0
+        if not self._TrigCfg or not self.hdev: return -1
+        return self._TrigCfg(self.hdev, BYTE(ln), BYTE(edge))
+
+    def trig_create(self) -> Optional[HANDLE]:
+        if MOCK: return HANDLE(2)
+        if not self._TrigEvt or not self.hdev: return None
+        h = HANDLE()
+        rc = self._TrigEvt(self.hdev, ctypes.byref(h))
+        return h if rc == 0 else None
+
+    def trig_wait(self, hev: HANDLE, timeout_ms: int) -> int:
+        if MOCK: return 0  # signaled
+        if not self._TrigWait or not self.hdev: return -1
+        return int(self._TrigWait(self.hdev, hev, DWORD(timeout_ms)))
+
+    def trig_status(self) -> int:
+        if MOCK: return 1
+        if not self._TrigGet or not self.hdev: return -1
+        v = BYTE(0)
+        rc = self._TrigGet(self.hdev, ctypes.byref(v))
+        return v.value if rc == 0 else -1
+
+    def trig_close(self, hev: HANDLE) -> int:
+        if MOCK: return 0
+        if not self._TrigClose or not self.hdev: return -1
+        return self._TrigClose(self.hdev, hev)
+
+    # ---- 版本 ----
+    def versions(self) -> dict:
+        if MOCK:
+            return {"dll":"1.0.0.0","driver":"1.0.0.0","firmware":"1.0.0.0"}
+        out = {"dll":None,"driver":None,"firmware":None}
+        try:
+            if self._GetDLLVer: out["dll"] = _dw_to_verstr(int(self._GetDLLVer()))
+        except: pass
+        try:
+            if self._GetDRVVer: out["driver"] = _dw_to_verstr(int(self._GetDRVVer()))
+        except: pass
+        try:
+            if self._GetFWVer and self.hdev:
+                dw = DWORD(0)
+                rc = self._GetFWVer(self.hdev, ctypes.byref(dw))
+                if rc == 0:
+                    out["firmware"] = _dw_to_verstr(int(dw.value))
+        except: pass
+        return out
+
+
+# ======================================================================
+#                           CHR34XXX（串口卡）
+# ======================================================================
 class CHR34XXX:
+    _dll_name = "CHR34XXX.dll"
+
     def __init__(self):
-        if not MOCK and _chr34 is None:
-            raise SERError("未找到 CHR34XXX.dll（或位数不匹配）")
-        if not MOCK:
-            _chr34.CHR34XXX_StartDevice.argtypes = [ctypes.c_int]
-            _chr34.CHR34XXX_StartDevice.restype  = BOOL
-            _chr34.CHR34XXX_StopDevice.argtypes  = [ctypes.c_int]
-            _chr34.CHR34XXX_StopDevice.restype   = BOOL
-
-            _chr34.CHR34XXX_Ch_SetRsMode.argtypes = [ctypes.c_int, BYTE, BYTE, BOOL]
-            _chr34.CHR34XXX_Ch_SetRsMode.restype  = BOOL
-
-            _chr34.CHR34XXX_Ch_SetCommState.argtypes = [ctypes.c_int, BYTE, ctypes.POINTER(CHRUART_DCB_ST)]
-            _chr34.CHR34XXX_Ch_SetCommState.restype  = BOOL
-
-            _chr34.CHR34XXX_Ch_WriteFile.argtypes = [ctypes.c_int, BYTE, DWORD, LPBYTE, LPDWORD]
-            _chr34.CHR34XXX_Ch_WriteFile.restype  = BOOL
-
-            _chr34.CHR34XXX_Ch_ReadFile.argtypes = [ctypes.c_int, BYTE, DWORD, LPBYTE, LPDWORD]
-            _chr34.CHR34XXX_Ch_ReadFile.restype  = BOOL
-
+        global MOCK
+        self._dll = _load_dll(self._dll_name)
+        if self._dll is None:
+            MOCK = True
         self.dev_id: Optional[int] = None
+        self._bind()
 
-    def open(self, dev_id: int):
-        if MOCK: self.dev_id = dev_id; return
-        ok = _chr34.CHR34XXX_StartDevice(dev_id)
-        if not ok: raise SERError("StartDevice fail")
-        self.dev_id = dev_id
+    def _bind(self):
+        d = self._dll
+        # 生命周期
+        self._Start = _bind_opt(d, "CHR34XXX_StartDevice", [ctypes.c_int], BOOL)
+        self._Stop  = _bind_opt(d, "CHR34XXX_StopDevice",  [ctypes.c_int], BOOL)
+        # 设置
+        self._SetRs = _bind_opt(d, "CHR34XXX_Ch_SetRsMode", [ctypes.c_int, BYTE, BYTE, BOOL], BOOL)
+        # DCB 结构（按手册）
+        class CHRUART_DCB_ST(ctypes.Structure):
+            _fields_ = [
+                ("BaudRate", DWORD),
+                ("ByteSize", BYTE),
+                ("Parity",   BYTE),
+                ("StopBits", BYTE),
+            ]
+        self.CHRE_DCB = CHRUART_DCB_ST
+        self._SetComm = _bind_opt(d, "CHR34XXX_Ch_SetCommState",
+                                  [ctypes.c_int, BYTE, ctypes.POINTER(CHRUART_DCB_ST)], BOOL)
+        # IO
+        self._Write = _bind_opt(d, "CHR34XXX_Ch_WriteFile",
+                                [ctypes.c_int, BYTE, DWORD, ctypes.c_void_p, ctypes.POINTER(DWORD)], BOOL)
+        self._Read  = _bind_opt(d, "CHR34XXX_Ch_ReadFile",
+                                [ctypes.c_int, BYTE, DWORD, ctypes.c_void_p, ctypes.POINTER(DWORD)], BOOL)
 
-    def close(self):
-        if self.dev_id is not None and not MOCK:
-            _chr34.CHR34XXX_StopDevice(self.dev_id)
+        # 版本
+        self._GetDLLVer = _bind_opt(d, "CHR34XXX_GetDLLVersion",  [], DWORD)
+        self._GetDRVVer = _bind_opt(d, "CHR34XXX_GetDriverVersion",[], DWORD)
+        self._GetFWVer  = _bind_opt(d, "CHR34XXX_GetFirmwareVersion",
+                                    [ctypes.c_int, ctypes.POINTER(DWORD)], ctypes.c_int)
+
+    # ---- 生命周期 ----
+    def start(self, dev_id: int) -> bool:
+        if MOCK:
+            self.dev_id = int(dev_id)
+            return True
+        if not self._Start: return False
+        ok = bool(self._Start(int(dev_id)))
+        if ok: self.dev_id = int(dev_id)
+        return ok
+
+    def stop(self) -> bool:
+        if self.dev_id is None: return True
+        if MOCK:
+            self.dev_id = None
+            return True
+        if not self._Stop: return False
+        ok = bool(self._Stop(int(self.dev_id)))
         self.dev_id = None
+        return ok
 
-    def set_rs(self, ch: int, mode: int, half_duplex: bool = True):
-        if MOCK: return
-        ok = _chr34.CHR34XXX_Ch_SetRsMode(self.dev_id, BYTE(ch), BYTE(mode), BOOL(1 if half_duplex else 0))
-        if not ok: raise SERError("SetRsMode fail")
+    # ---- 参数 ----
+    # mode: 0=232,1=422,2=485; term=True/False
+    def set_rs_mode(self, ch: int, mode: int, term: bool=True) -> bool:
+        if MOCK: return True
+        if not self._SetRs or self.dev_id is None: return False
+        return bool(self._SetRs(int(self.dev_id), BYTE(ch), BYTE(mode), BOOL(1 if term else 0)))
 
-    def set_comm(self, ch: int, baud: int, data_bits: int, parity: int, stop_bits: int):
-        if MOCK: return
-        d = CHRUART_DCB_ST(DWORD(baud), BYTE(data_bits), BYTE(parity), BYTE(stop_bits))
-        ok = _chr34.CHR34XXX_Ch_SetCommState(self.dev_id, BYTE(ch), ctypes.byref(d))
-        if not ok: raise SERError("SetComm fail")
+    # DCB: baud, byteSize, parity(0n/1o/2e/3m/4s), stopBits(0:1,1:1.5,2:2)
+    def set_comm(self, ch: int, baud: int, byte_size: int=8, parity: int=0, stop_bits: int=0) -> bool:
+        if MOCK: return True
+        if not self._SetComm or self.dev_id is None: return False
+        dcb = self.CHRE_DCB(DWORD(baud), BYTE(byte_size), BYTE(parity), BYTE(stop_bits))
+        return bool(self._SetComm(int(self.dev_id), BYTE(ch), ctypes.byref(dcb)))
 
-    def write_hex(self, ch: int, hex_bytes: List[int]) -> int:
-        if MOCK: return len(hex_bytes)
-        arr = (BYTE * len(hex_bytes))(*hex_bytes)
-        w = DWORD(0)
-        ok = _chr34.CHR34XXX_Ch_WriteFile(self.dev_id, BYTE(ch), DWORD(len(hex_bytes)), arr, ctypes.byref(w))
-        if not ok: raise SERError("write fail")
-        return int(w.value)
+    # ---- IO ----
+    def write(self, ch: int, data: bytes) -> int:
+        if MOCK: return len(data)
+        if not self._Write or self.dev_id is None: return -1
+        n = DWORD(0)
+        ok = self._Write(int(self.dev_id), BYTE(ch), DWORD(len(data)),
+                         ctypes.c_char_p(data), ctypes.byref(n))
+        return int(n.value) if ok else -1
 
-    def read_n(self, ch: int, n: int) -> bytes:
-        if MOCK: return b"\x48\x65\x6C\x6C\x6F\x0D\x0A"  # "Hello\r\n"
-        buf = (BYTE * n)()
-        r = DWORD(0)
-        ok = _chr34.CHR34XXX_Ch_ReadFile(self.dev_id, BYTE(ch), DWORD(n), buf, ctypes.byref(r))
-        if not ok: raise SERError("read fail")
-        return bytes(buf[: int(r.value)])
+    def read(self, ch: int, nbytes: int) -> bytes:
+        if MOCK:  # 模拟：回显长度
+            return bytes([0x30 + (i % 10) for i in range(max(0, nbytes))])
+        if not self._Read or self.dev_id is None: return b""
+        buf = (ctypes.c_ubyte * nbytes)()
+        n   = DWORD(0)
+        ok  = self._Read(int(self.dev_id), BYTE(ch), DWORD(nbytes),
+                         ctypes.cast(buf, ctypes.c_void_p), ctypes.byref(n))
+        return bytes(buf[: int(n.value)]) if ok else b""
+
+    # ---- 版本 ----
+    def versions(self) -> dict:
+        if MOCK:
+            return {"dll":"1.0.0.0","driver":"1.0.0.0","firmware":"1.0.0.0"}
+        out = {"dll":None,"driver":None,"firmware":None}
+        try:
+            if self._GetDLLVer: out["dll"] = _dw_to_verstr(int(self._GetDLLVer()))
+        except: pass
+        try:
+            if self._GetDRVVer: out["driver"] = _dw_to_verstr(int(self._GetDRVVer()))
+        except: pass
+        try:
+            if self._GetFWVer and (self.dev_id is not None):
+                dw = DWORD(0)
+                rc = self._GetFWVer(int(self.dev_id), ctypes.byref(dw))
+                if rc == 0:
+                    out["firmware"] = _dw_to_verstr(int(dw.value))
+        except: pass
+        return out
 
