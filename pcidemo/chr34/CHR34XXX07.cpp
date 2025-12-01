@@ -12,6 +12,77 @@
 #include "demo_types.h"
 
 
+
+
+// ====== version helpers (通用) ======
+static FARPROC FindAny(HMODULE h, std::initializer_list<const char*> names) {
+    for (auto n : names) {
+        if (auto p = GetProcAddress(h, n)) return p;
+    }
+    return nullptr;
+}
+static void PrintVerLine(const char* tag, const char* v) {
+    printf("%s: %s\n", tag, v && *v ? v : "N/A");
+}
+static void QueryAndPrintDllDriverFW(
+    const wchar_t* dllPath,
+    const char*    tagPrefix,
+    BYTE           devId,
+    std::initializer_list<const char*> dllFns,      // e.g. {"CHR34XXX_GetDllVersion","CHR34XXX_GetDLLVersion","CHR34XXX_GetDllVer"}
+    std::initializer_list<const char*> driverFns,   // e.g. {"CHR34XXX_GetDriverVersion","CHR34XXX_GetDrvVersion"}
+    std::initializer_list<const char*> fwFns        // e.g. {"CHR34XXX_GetFwVersion","CHR34XXX_GetFirmwareVersion"}
+) {
+    HMODULE h = LoadLibraryW(dllPath);
+    if (!h) {
+        printf("[%s] LoadLibrary failed: %ls\n", tagPrefix, dllPath);
+        return;
+    }
+
+    // 假设签名：BOOL Fn(char* buf, DWORD bufSize) ；FW 版本可能需要 devId：BOOL Fn(BYTE devId, char* buf, DWORD bufSize)
+    char buf[128] = {0};
+    typedef BOOL (__stdcall *GET_STR1)(char*, DWORD);
+    typedef BOOL (__stdcall *GET_STR2)(BYTE, char*, DWORD);
+
+    // DLL
+    if (auto p = (GET_STR1)FindAny(h, dllFns)) {
+        if (p(buf, (DWORD)sizeof(buf))) PrintVerLine((std::string(tagPrefix)+" dll").c_str(), buf);
+        else PrintVerLine((std::string(tagPrefix)+" dll").c_str(), "query failed");
+    } else {
+        PrintVerLine((std::string(tagPrefix)+" dll").c_str(), "not exported");
+    }
+
+    // Driver
+    ZeroMemory(buf, sizeof(buf));
+    if (auto p = (GET_STR1)FindAny(h, driverFns)) {
+        if (p(buf, (DWORD)sizeof(buf))) PrintVerLine((std::string(tagPrefix)+" driver").c_str(), buf);
+        else PrintVerLine((std::string(tagPrefix)+" driver").c_str(), "query failed");
+    } else {
+        PrintVerLine((std::string(tagPrefix)+" driver").c_str(), "not exported");
+    }
+
+    // FW
+    ZeroMemory(buf, sizeof(buf));
+    FARPROC pf = FindAny(h, fwFns);
+    if (pf) {
+        // 兼容两种签名
+        BOOL ok = FALSE;
+        // 先试无需 devId 的签名
+        ok = ((GET_STR1)pf)(buf, (DWORD)sizeof(buf));
+        if (!ok) {
+            // 再试带 devId 的版本
+            ok = ((GET_STR2)pf)(devId, buf, (DWORD)sizeof(buf));
+        }
+        if (ok) PrintVerLine((std::string(tagPrefix)+" fw").c_str(), buf);
+        else   PrintVerLine((std::string(tagPrefix)+" fw").c_str(), "query failed");
+    } else {
+        PrintVerLine((std::string(tagPrefix)+" fw").c_str(), "not exported");
+    }
+
+    FreeLibrary(h);
+}
+// ====== end helpers ======
+
+
 // ---- forward declarations ----
 void initApiParam();
 
