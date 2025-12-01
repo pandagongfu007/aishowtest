@@ -1,0 +1,8 @@
+CHR34XXX_ASYN_Gen:异步收发(设置定时参数SendMode为1时，为定时发送)
+CHR34XXX_ASYN_Pt:异步协议接收
+CHR34XXX_SYNC:同步收发
+CHR34XXX_ASYN_GenReceive:普通接收
+CHR34XXX_ASYN_GenSend:普通发送
+CHR34XXX_ASYN_GenTimeSend:定时发送
+CHR34XXX_ASYN_PtRx:异步协议普通接收
+CHR34XXX_ASYN_PtTx:异步协议普通发送

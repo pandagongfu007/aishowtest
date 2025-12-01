@@ -1,0 +1,45 @@
+C:\Users\dy\Desktop\vsProject\CHR34XXX_ASYN\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.exe
+C:\Users\dy\Desktop\vsProject\CHR34XXX_ASYN\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.pdb
+C:\Users\dy\Desktop\vsProject\CHR34XXX_ASYN\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+C:\Users\dy\Desktop\vsProject\CHR34XXX_ASYN\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+C:\Users\Administrator\Desktop\vsProject\CHR34XXX_ASYN\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.exe
+C:\Users\Administrator\Desktop\vsProject\CHR34XXX_ASYN\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.pdb
+C:\Users\Administrator\Desktop\vsProject\CHR34XXX_ASYN\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+C:\Users\Administrator\Desktop\vsProject\CHR34XXX_ASYN\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+C:\Users\Administrator\Desktop\vsProject\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+C:\Users\Administrator\Desktop\vsProject\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+C:\Users\Administrator\Desktop\vsProject\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.exe
+C:\Users\Administrator\Desktop\vsProject\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.pdb
+C:\Users\Administrator\Desktop\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+C:\Users\Administrator\Desktop\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+C:\Users\Administrator\Desktop\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.exe
+C:\Users\Administrator\Desktop\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.pdb
+C:\Users\Administrator\Desktop\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.csprojResolveAssemblyReference.cache
+C:\Users\dy\Desktop\CHR34XXX_demo\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+C:\Users\dy\Desktop\CHR34XXX_demo\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+C:\Users\dy\Desktop\CHR34XXX_demo\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.exe
+C:\Users\dy\Desktop\CHR34XXX_demo\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.pdb
+C:\Users\dy\Desktop\CHR34XXX_demo\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.csprojResolveAssemblyReference.cache
+G:\文件\凯瑞\项目\CHR34XXX\CHR34XXX_demo\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+G:\文件\凯瑞\项目\CHR34XXX\CHR34XXX_demo\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+C:\Users\krck01\Desktop\CHRU34XXX_demo_20240401\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+C:\Users\krck01\Desktop\CHRU34XXX_demo_20240401\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen - 副本\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen - 副本\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen - 副本\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.exe
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen - 副本\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.pdb
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_Gen - 副本\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.csprojResolveAssemblyReference.cache
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.exe
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.pdb
+D:\Program Files\feiq\AutoRecv Files\软件工程师-丁意(70B5E8404363)\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Desktop\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+C:\Users\Administrator\Desktop\CHRU34XXX_demo_20240402\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+C:\Users\Administrator\Desktop\CHRU34XXX_demo_20240409\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.exe
+C:\Users\Administrator\Desktop\CHRU34XXX_demo_20240409\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.pdb
+C:\Users\Administrator\Desktop\CHRU34XXX_demo_20240409\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.exe
+C:\Users\Administrator\Desktop\CHRU34XXX_demo_20240409\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\bin\Debug\CHR34XXX_ASYN.pdb
+C:\Users\Administrator\Desktop\CHRU34XXX_demo_20240409\CHR34XXX_demo_c#\CHR34XXX_ASYN_GenTimeSend\CHR34XXX_ASYN\obj\x86\Debug\CHR34XXX_ASYN.csprojResolveAssemblyReference.cache

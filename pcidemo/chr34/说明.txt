@@ -1,0 +1,15 @@
+01:普通异步透明收发。(可仅修改initApiParam()进行重配置)
+02:普通接收(改m_recvCfg.RecvIntEn=0)
+03:中断接收(改m_recvCfg.RecvIntEn=1)
+04:定时发送(改m_sendCfg.SendMode=1)
+05:普通发送(改m_sendCfg.SendMode=0)
+06:异步协议FIFO收发(改m_recvCfg.ASYN_RecvMode=1)
+07:异步协议刷新收发(改m_recvCfg.ASYN_RecvMode=1,m_ptCGF.PtRxMode = 1)
+08:同步收发(ChWorkMode=1，通道要奇数通道)
+RxGener:普通接收
+TxOnce:普通发送
+TxTime:定时发送
+test:异步透明收发完整例程
+SynChRx：同步普通接收
+SynTxTime:同步定时发送
+FastUse：快速使用
