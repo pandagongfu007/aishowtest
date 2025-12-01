@@ -13,7 +13,6 @@
 
 
 
-
 // ====== version helpers (通用) ======
 static FARPROC FindAny(HMODULE h, std::initializer_list<const char*> names) {
     for (auto n : names) {
@@ -128,6 +127,7 @@ BYTE TxBuf[256] = {0};//发送buf
 BYTE Rxbuf[256] = {0};//接收buf
 DWORD dwResult = 0;//实际接收的数据量
 RecvCfg m_recvCfg = {0};//接收配置结构体
+
 SendCfg m_sendCfg = {0};//发送配置结构体
 ptCGF m_ptCGF = {0};//协议配置结构体
 
@@ -141,6 +141,18 @@ int main(int argc, char** argv)
 	CHR34xxx_ResetCard();
 	//打印SN号
 	printf("SN:%X\n",stDevParInfo.dwSN);
+
+	// 查询 CHR34 版本（DLL / 驱动 / 固件）
+	QueryAndPrintDllDriverFW(
+		L"Lib\\CHR34XXX.dll",		 // 如果 DLL 在运行目录其他位置，请写绝对/相对正确路径
+		"CHR34",
+		devId,
+		{ "CHR34XXX_GetDllVersion", "CHR34XXX_GetDLLVersion", "CHR34XXX_GetDllVer" },
+		{ "CHR34XXX_GetDriverVersion", "CHR34XXX_GetDrvVersion" },
+		{ "CHR34XXX_GetFwVersion", "CHR34XXX_GetFirmwareVersion" }
+	);
+
+	
 	//初始化发送buf
 	if (!m_recvCfg.ASYN_RecvMode)//透明模式
 	{
