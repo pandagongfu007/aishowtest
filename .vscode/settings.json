@@ -1,0 +1,24 @@
+{
+  "files.encoding": "utf8bom",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+
+  // C/C++ 智能感知（使用 MSVC）
+  "C_Cpp.default.compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/**/bin/Hostx64/x64/cl.exe",
+  "C_Cpp.default.intelliSenseMode": "msvc-x64",
+  "C_Cpp.default.cppStandard": "c++17",
+  "C_Cpp.default.cStandard": "c11",
+
+  // Python
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+
+  // Node
+  "npm.enableScriptExplorer": true,
+
+  // 终端
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+
+  // 统一行结尾/编码
+  "files.eol": "\r\n"
+}
+

@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "cpp: build CHR34XXX01 (MSBuild)",
+      "type": "shell",
+      "windows": {
+        "command": "\"C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe\" aishowtestwindrv/CHR34XXX01/CHR34XXX01.sln /t:Build /p:Configuration=Debug;Platform=x64"
+      },
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "py: install deps (driver-py)",
+      "type": "shell",
+      "command": "python -m venv .venv && .\\.venv\\Scripts\\pip install -U pip && .\\.venv\\Scripts\\pip install -r aishowtestwindrv-py/requirements.txt",
+      "problemMatcher": []
+    },
+    {
+      "label": "node: gui install",
+      "type": "shell",
+      "command": "cd GUI && npm i",
+      "problemMatcher": []
+    },
+    {
+      "label": "node: gui dev",
+      "type": "shell",
+      "command": "cd GUI && npm run dev",
+      "problemMatcher": []
+    },
+    {
+      "label": "node: backend install",
+      "type": "shell",
+      "command": "cd gui-backend && npm i",
+      "problemMatcher": []
+    },
+    {
+      "label": "node: backend dev",
+      "type": "shell",
+      "command": "cd gui-backend && npm run dev",
+      "problemMatcher": []
+    }
+  ]
+}
+

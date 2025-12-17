@@ -1,0 +1,31 @@
+{
+  "folders": [
+    { "name": "root", "path": "." },
+    { "name": "driver-cpp", "path": "aishowtestwindrv" },
+    { "name": "driver-py", "path": "aishowtestwindrv-py" },
+    { "name": "ate-conn-starter", "path": "ate-conn-starter" },
+    { "name": "gui", "path": "GUI" },
+    { "name": "gui-backend", "path": "gui-backend" },
+    { "name": "scripts", "path": "scripts" },
+    { "name": "video-service", "path": "video-service" }
+  ],
+  "settings": {
+    "files.encoding": "utf8bom",
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "git.confirmSync": false
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.cpptools",
+      "ms-vscode.cmake-tools",
+      "ms-vscode.vscode-typescript-next",
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "ms-azuretools.vscode-docker",
+      "ms-vscode.powershell",
+      "ms-vscode.vscode-node-azure-pack",
+      "github.vscode-pull-request-github"
+    ]
+  }
+}
+
